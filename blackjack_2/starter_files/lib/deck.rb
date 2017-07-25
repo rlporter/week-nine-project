@@ -2,7 +2,7 @@ require_relative "card"
 
 class Deck
 
-  attr_accessors :card_container
+  attr_accessor :card_container
 
   def initialize
     @card_container = []
@@ -25,5 +25,4 @@ class Deck
   def draw
     card_container.shift
   end
-
-  
+end
