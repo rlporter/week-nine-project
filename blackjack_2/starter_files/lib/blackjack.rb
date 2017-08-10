@@ -6,6 +6,8 @@ class Hand
 
   def initialize
     @cards = []
+    @player_hand = []
+    @dealer_hand = []
   end
 
   def hit!(deck)
@@ -17,7 +19,7 @@ class Hand
     @cards.each do |card|
       hand_value += card.value
     end
-    hand_value
+      hand_value
   end
 end
 
@@ -30,13 +32,8 @@ attr_accessor :player_hand, :dealer_hand, :money_talley
     @deck = Deck.new
     @player_hand = Hand.new
     @dealer_hand = Hand.new
-    @money_talley = money_talley
+    @money_talley = 100
   end
-end
-
-  def start_prompt
-  puts "Wanna play?"
-end
 
   def get_yes_or_no
   while true
@@ -46,14 +43,24 @@ end
       return true
     elsif answer[0] == "no"
       return false
-    end
+    else
     puts "That is not a valid answer!"
   end
-end
 
-  def self.start_game
+  def start_prompt
+    puts "Wanna play?"
+    get_yes_or_no
+  end
+
+  def start_game
     if answer == true
-    puts "You start with $100 and bet $10."
+      player_hand = []
+      dealer_hand = []
+      puts "You start with #{money_talley} and bet $10."
+    else
+      puts "Okay. Another time."
+      end_game
+    end
   end
 
   def initial_deal
@@ -63,28 +70,90 @@ end
   end
 
   def game_status
-    player_total = play_hand.each { |i| sum+=i}
-    dealer_total = deal_hand.each {|j| sum+=j}
-    puts "Your cards are:  #{player_cards}, and the total is #{player_total}."
-    puts "Do you want to (h)it or (s)tand?"
-    player_reply.get_yes_or_no
-    # deal_card1 = deal_hand.new
-    # draw.card
-    # puts "Dealer card is: #{dcard1}."
-    # pcard2 = play_hand.new
-    # puts "Your second card is: #{pcard2} and the total is (#{pcard1.value} + #{pcard2.value})"
-
+    player_total = player_hand.hand_value.each { |i| sum+=i}
+    dealer_total = dealer_hand.hand_value.each {|j| sum+=j}
+    puts "Your cards are:  #{player_hand.to_s}, and the total is #{player_total.to_i}."
+    if player_hand.hand_value == 21
+      puts "Blackjack! You win!"
+      end_game
+    else
+      puts "First dealer card is: #{dealer_hand[0].to_s}."
+      player_turn
   end
 
-
-  def player_hit_stay
+  def player_turn
+     puts "Do you want to hit (yes) or stand (no)?"
+    get_yes_or_no
+    if answer == true
+      deck.draw << player_hand
+      puts "Your cards are:  #{player_hand.to_s}, and the total is #{player_total.to_i}."
+      while player_hand !bust?
+        player_turn
+    else
+      dealer_turn
+    end
   end
 
-  # def dealer_turn
-  # end
-  #
-  # def end_game
-  # end
+  def bust?
+    hand_value > 21
+    puts "Busted! Play again?"
+    get_yes_or_no
+    if answer == true
+      play_again
+    else
+    end_game
+  end
 
+  def dealer_turn
+    puts "Dealer second card is: #{dealer_hand[1].to_s} and the total is #{dealer_total.to_i}"
+    if dealer_hand.hand_value == 21
+      puts "Blackjack! Dealer wins!"
+      end_game
+    elsif dealer_hand.hand_value < 17
+      puts "Dealer hits."
+      while dealer_hand.hand_value < 17 && dealer_hand.hand_value !bust?
+        deck.draw << dealer_hand
+    elsif dealer_hand.hand_value >= 17 && < 21
+      puts "Dealer stands."
+    elsif dealer_hand.hand_value > 21
+      puts "Dealer is busted. You win!"
+      game_total
+    else game_total
+  end
+
+  def game_total
+    if player_hand.hand_value > 21
+      bust?
+    elsif player_hand.hand_value > dealer_hand.hand_value
+      puts "Player wins! Play again?"
+      get_yes_or_no
+      if answer == true
+        play_again
+      else
+      end_game
+    elsif dealer_hand.hand_value > player_hand.hand_value
+      puts "Dealer wins! Play again?"
+      if answer == true
+        play_again
+      else
+        puts "Okay, bye."
+        end_game
+      end
+    end
+  end
+
+  def play_again?
+    @player_win = player_hand !bust? && player_hand.hand_value > dealer_hand.hand_value
+    if player_win
+      @money_talley = 100
+    else set(@money_talley -= 10)
+    end
+    start_game
+  end
+
+  def end_game
+    puts "Game over."
+    exit
+  end
 
 end
