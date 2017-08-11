@@ -1,34 +1,12 @@
 require_relative "card"
 require_relative "deck"
-
-class Hand
-  attr_accessor :cards
-
-  def initialize
-    @cards = []
-    @player_hand = []
-    @dealer_hand = []
-  end
-
-  def hit!(deck)
-    @cards << deck.cards.shift
-  end
-
-  def hand_value
-    hand_value = 0
-    @cards.each do |card|
-      hand_value += card.value
-    end
-      hand_value
-  end
-end
-
+require_relative "hand"
 
 class Game
 
-attr_accessor :player_hand, :dealer_hand, :money_talley
+attr_accessor :card, :deck, :hand_value, :player_hand, :dealer_hand, :money_talley
 
-  def initialize (player_hand, dealer_hand, money_talley)
+  def initialize(player_hand, dealer_hand, money_talley)
     @deck = Deck.new
     @player_hand = Hand.new
     @dealer_hand = Hand.new
@@ -46,6 +24,7 @@ attr_accessor :player_hand, :dealer_hand, :money_talley
     else
     puts "That is not a valid answer!"
   end
+end
 
   def start_prompt
     puts "Wanna play?"
@@ -79,6 +58,7 @@ attr_accessor :player_hand, :dealer_hand, :money_talley
     else
       puts "First dealer card is: #{dealer_hand[0].to_s}."
       player_turn
+    end
   end
 
   def player_turn
@@ -89,9 +69,16 @@ attr_accessor :player_hand, :dealer_hand, :money_talley
       puts "Your cards are:  #{player_hand.to_s}, and the total is #{player_total.to_i}."
       while player_hand !bust?
         player_turn
+      end
     else
       dealer_turn
     end
+  end
+end
+
+  def end_game
+    puts "Game over."
+    exit
   end
 
   def bust?
@@ -103,6 +90,7 @@ attr_accessor :player_hand, :dealer_hand, :money_talley
     else
     end_game
   end
+end
 
   def dealer_turn
     puts "Dealer second card is: #{dealer_hand[1].to_s} and the total is #{dealer_total.to_i}"
@@ -111,14 +99,16 @@ attr_accessor :player_hand, :dealer_hand, :money_talley
       end_game
     elsif dealer_hand.hand_value < 17
       puts "Dealer hits."
-      while dealer_hand.hand_value < 17 && dealer_hand.hand_value !bust?
+      while (dealer_hand.hand_value < 17 && dealer_hand.hand_value != bust?)
         deck.draw << dealer_hand
-    elsif dealer_hand.hand_value >= 17 && < 21
+      end
+    elsif (dealer_hand.hand_value >= 17 && dealer_hand.hand_value < 21)
       puts "Dealer stands."
     elsif dealer_hand.hand_value > 21
       puts "Dealer is busted. You win!"
       game_total
     else game_total
+    end
   end
 
   def game_total
@@ -131,6 +121,7 @@ attr_accessor :player_hand, :dealer_hand, :money_talley
         play_again
       else
       end_game
+    end
     elsif dealer_hand.hand_value > player_hand.hand_value
       puts "Dealer wins! Play again?"
       if answer == true
@@ -147,13 +138,8 @@ attr_accessor :player_hand, :dealer_hand, :money_talley
     if player_win
       @money_talley = 100
     else set(@money_talley -= 10)
-    end
     start_game
   end
-
-  def end_game
-    puts "Game over."
-    exit
-  end
-
 end
+
+Game.new.start_prompt
